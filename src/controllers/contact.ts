@@ -42,6 +42,7 @@ export const identifyContactDetails: RequestHandler  = async(req: Request, res: 
 
   if (!email && !phoneNumber) {
     res.status(400).json({ error: "At least one of email or phoneNumber must be provided" });
+    return;
   }
 
   try {
@@ -83,6 +84,7 @@ export const identifyContactDetails: RequestHandler  = async(req: Request, res: 
       res.status(200).json({
         contact: buildResponse(primaryContactId, emails, phoneNumbers, secondaryContactIds)
       });
+      return;
     }
 
     if (!hasSinglePrimaryContact(linkedContacts) && linkedContacts.length > 1) {
@@ -93,10 +95,12 @@ export const identifyContactDetails: RequestHandler  = async(req: Request, res: 
     res.status(200).json({
       contact: buildResponse(primaryContactId, emails, phoneNumbers, secondaryContactIds)
     });
+    return;
 
   } catch (error) {
     console.error("Error in identifyContactDetails:", error);
     res.status(500).json({ error: "Internal server error" });
+    return;
   }
 }
 
