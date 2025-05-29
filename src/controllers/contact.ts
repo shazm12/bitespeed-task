@@ -69,6 +69,7 @@ export const identifyContactDetails: RequestHandler  = async(req: Request, res: 
 
     const { emails, phoneNumbers, secondaryContactIds } = prepareResponseData(linkedContacts);
 
+
     // If the contact data is a new contact data
     if ((!isEmailPresent || !isPhonePresent) && (email || phoneNumber)) {
       const newContact = await createContactDetail(
@@ -87,6 +88,7 @@ export const identifyContactDetails: RequestHandler  = async(req: Request, res: 
       return;
     }
 
+    // if we have two primary contacts and need to make either one of them secondary(done by seeing the created time)
     if (!hasSinglePrimaryContact(linkedContacts) && linkedContacts.length > 1) {
         primaryContactId = linkedContacts[0].id;
         await handleMultiplePrimaryContacts(linkedContacts, primaryContactId, secondaryContactIds);
