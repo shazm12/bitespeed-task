@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { query } from '../helpers/db';
 import { ContactDetails } from '../interfaces/ContactDetails';
 import {IdentifyContactDetailsResponse} from "../interfaces/IdentifyContactDetailsResponse";
@@ -37,11 +37,11 @@ const hasSinglePrimaryContact = (linkedContacts: ContactDetails[]): boolean => {
 };
 
 
-export const identifyContactDetails = async (req: Request, res: Response) => {
+export const identifyContactDetails: RequestHandler  = async(req: Request, res: Response) => {
   const { email, phoneNumber } = req.body;
 
   if (!email && !phoneNumber) {
-    return res.status(400).json({ error: "At least one of email or phoneNumber must be provided" });
+    res.status(400).json({ error: "At least one of email or phoneNumber must be provided" });
   }
 
   try {
@@ -80,7 +80,7 @@ export const identifyContactDetails = async (req: Request, res: Response) => {
 
       updateResponseData(newContact, emails, phoneNumbers, secondaryContactIds);
 
-      return res.status(200).json({
+      res.status(200).json({
         contact: buildResponse(primaryContactId, emails, phoneNumbers, secondaryContactIds)
       });
     }
@@ -90,15 +90,15 @@ export const identifyContactDetails = async (req: Request, res: Response) => {
         await handleMultiplePrimaryContacts(linkedContacts, primaryContactId, secondaryContactIds);
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       contact: buildResponse(primaryContactId, emails, phoneNumbers, secondaryContactIds)
     });
 
   } catch (error) {
     console.error("Error in identifyContactDetails:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error" });
   }
-};
+}
 
 
 const findMatchingContacts = (
