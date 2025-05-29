@@ -4,9 +4,6 @@ import { ContactDetails } from '../interfaces/ContactDetails';
 import {IdentifyContactDetailsResponse} from "../interfaces/IdentifyContactDetailsResponse";
 
 
-/**
- * Creates a new contact detail record in the database
- */
 const createContactDetail = async (
   email: string | null, 
   phoneNumber: string | null, 
@@ -34,9 +31,7 @@ const createContactDetail = async (
   }
 };
 
-/**
- * Checks if there's only one primary contact in the linked contacts list
- */
+
 const hasSinglePrimaryContact = (linkedContacts: ContactDetails[]): boolean => {
   return linkedContacts.filter(c => c.linkPrecedence === "primary").length === 1;
 };
@@ -73,7 +68,7 @@ export const identifyContactDetails = async (req: Request, res: Response) => {
 
     const { emails, phoneNumbers, secondaryContactIds } = prepareResponseData(linkedContacts);
 
-
+    // If the contact data is a new contact data
     if ((!isEmailPresent || !isPhonePresent) && (email || phoneNumber)) {
       const newContact = await createContactDetail(
         email || null, 
@@ -91,8 +86,8 @@ export const identifyContactDetails = async (req: Request, res: Response) => {
     }
 
     if (!hasSinglePrimaryContact(linkedContacts) && linkedContacts.length > 1) {
-      await handleMultiplePrimaryContacts(linkedContacts, secondaryContactIds);
-      primaryContactId = linkedContacts[0].id;
+        primaryContactId = linkedContacts[0].id;
+        await handleMultiplePrimaryContacts(linkedContacts, primaryContactId!, secondaryContactIds);
     }
 
     return res.status(200).json({
@@ -127,6 +122,72 @@ const findMatchingContacts = (
   });
 
   return { linkedContacts, isEmailPresent, isPhonePresent };
+};
+
+
+const prepareResponseData = (linkedContacts: ContactDetails[]) => {
+  const emails = new Set<string>();
+  const phoneNumbers = new Set<string>();
+  const secondaryContactIds = new Set<number>();
+
+  linkedContacts.forEach(contact => {
+    if (contact.email) emails.add(contact.email);
+    if (contact.phoneNumber) phoneNumbers.add(contact.phoneNumber);
+    if (contact.linkPrecedence === "secondary" && contact.id) {
+      secondaryContactIds.add(contact.id);
+    }
+  });
+
+  return { emails, phoneNumbers, secondaryContactIds };
+};
+
+
+const updateResponseData = (
+  newContact: ContactDetails,
+  emails: Set<string>,
+  phoneNumbers: Set<string>,
+  secondaryContactIds: Set<number>
+) => {
+  if (newContact.email) emails.add(newContact.email);
+  if (newContact.phoneNumber) phoneNumbers.add(newContact.phoneNumber);
+  if (newContact.linkPrecedence === "secondary" && newContact.id) {
+    secondaryContactIds.add(newContact.id);
+  }
+};
+
+
+const buildResponse = (
+  primaryContactId: number | null,
+  emails: Set<string>,
+  phoneNumbers: Set<string>,
+  secondaryContactIds: Set<number>
+): IdentifyContactDetailsResponse => {
+  return {
+    primaryContatctId: primaryContactId,
+    emails: Array.from(emails),
+    phoneNumbers: Array.from(phoneNumbers),
+    secondaryContactIds: Array.from(secondaryContactIds),
+  };
+};
+
+
+const handleMultiplePrimaryContacts = async (
+  linkedContacts: ContactDetails[],
+  primaryContactId: number,
+  secondaryContactIds: Set<number>
+) => {
+  const contactsToConvert = linkedContacts
+    .slice(1) // Keep the first contact as primary
+    .filter(contact => contact.linkPrecedence === "primary");
+
+  await Promise.all(
+    contactsToConvert.map(contact => {
+      convertToSecondaryContact(primaryContactId, contact)
+    }));
+
+  contactsToConvert.forEach(contact => {
+    if (contact.id) secondaryContactIds.add(contact.id);
+  });
 };
 
 
