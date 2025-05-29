@@ -130,3 +130,37 @@ const findMatchingContacts = (
 };
 
 
+const convertToSecondaryContact = async (
+  primaryContactId: number,
+  contact: ContactDetails
+): Promise<void> => {
+  try {
+    await query(
+      `UPDATE contact_details
+       SET link_precedence = 'secondary', linked_id = $1, updated_at = NOW()
+       WHERE id = $2`,
+      [primaryContactId, contact.id]
+    );
+  }
+catch(error) {
+    console.error("Error Occured: ", error);
+    throw new Error("Error Occured while performing db operation");
+  } 
+};
+
+
+const getAllContactDetails = async (): Promise<ContactDetails[]> => {
+  try {
+    const result = await query(
+      `SELECT id, email, phone_number as "phoneNumber", linked_id as "linkedId",
+              link_precedence as "linkPrecedence", created_at as "createdAt",
+              updated_at as "updatedAt"
+       FROM contact_details`
+    );
+    return result.rows;
+  }
+  catch(error) {
+    console.error("Error Occured: ", error);
+    throw new Error("Error Occured while getting all contacts");
+  }
+};
