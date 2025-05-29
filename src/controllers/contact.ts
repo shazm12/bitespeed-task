@@ -87,7 +87,7 @@ export const identifyContactDetails = async (req: Request, res: Response) => {
 
     if (!hasSinglePrimaryContact(linkedContacts) && linkedContacts.length > 1) {
         primaryContactId = linkedContacts[0].id;
-        await handleMultiplePrimaryContacts(linkedContacts, primaryContactId!, secondaryContactIds);
+        await handleMultiplePrimaryContacts(linkedContacts, primaryContactId, secondaryContactIds);
     }
 
     return res.status(200).json({
