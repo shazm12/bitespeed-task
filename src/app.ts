@@ -1,11 +1,20 @@
-import express, { Application } from 'express';
+import express, { Express, Request, Response } from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 
-const app: Application = express();
+import contactRouter from "./routes/contact";
+dotenv.config();
 
-// Middleware
+const app: Express = express();
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+const port = process.env.PORT || 3000;
 
+app.get("/", (req: Request, res: Response) => {
+  res.send("Express + TypeScript Server");
+});
+
+app.use("/", contactRouter);
 
 
 export default app;
