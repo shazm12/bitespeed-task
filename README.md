@@ -81,14 +81,18 @@ This app is deployed on [Render’s free tier](https://render.com/), which can r
 
 ## 🧪 Testing the API
 
-You can test the API using tools like [Postman](https://www.postman.com/) or [curl](https://curl.se/):
+- **Link:** https://bitespeed-identity-recon-api.onrender.com
 
-```bash
-curl -X POST https://https://bitespeed-identity-recon-api.onrender.com//identify \
-  -H 'Content-Type: application/json' \
-  -d '{"email": "shamik@gmail.com", "phoneNumber": "979797"}'
-```
 
+- You can test the API using tools like [Postman](https://www.postman.com/) or [curl](https://curl.se/):
+
+    ```bash
+    curl -X POST https://bitespeed-identity-recon-api.onrender.com/identify \
+    -H 'Content-Type: application/json' \
+    -d '{"email": "shamik@gmail.com", "phoneNumber": "979797"}'
+    ```
+
+---
 
 ## 📩 Contact
 
