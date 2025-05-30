@@ -79,6 +79,7 @@ export const identifyContactDetails: RequestHandler  = async(req: Request, res: 
         linkPrecedence
       );
 
+      primaryContactId = newContact.id;
 
       updateResponseData(newContact, emails, phoneNumbers, secondaryContactIds);
 
